@@ -1,0 +1,18 @@
+{
+  "name": "thai-meme-sounds",
+  "owner": {
+    "name": "droppdeadz",
+    "email": "dolawat.wannapira@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "thai-memes",
+      "description": "Thai meme sound effects for Claude Code",
+      "version": "1.0.0",
+      "source": {
+        "source": "github",
+        "repo": "droppdeadz/thai-meme-sounds"
+      }
+    }
+  ]
+}
