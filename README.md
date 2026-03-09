@@ -1,4 +1,4 @@
-# thai-memes
+# Thai Memes CC
 
 Thai meme sound effects for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
