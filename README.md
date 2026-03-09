@@ -30,10 +30,10 @@ Then restart Claude Code.
 
 | Pack | Sounds |
 |------|--------|
-| **khom** (default) | ez kids, more harder, lets go, smell bad, stab, i sus, please don't, ubah, slap, this is my ways, u know me?, thuy, want more |
+| **khom** (default) | go!, i mhor, red watch, dont kick me, i'll leave, khong dee, slap, i sus, mun jah, stab, ganster, i song, mai dai dak, more harder, thuy, oil tattoo, smell bad, i sus 2, please don't, ubah, this is my ways, u know me? |
 | **master-daeng (NSFW)** | say hello, for what, u cool?, u good?, khaeng, hom, tell u, lick, shark wow |
 | **phiicchaa (NSFW)** | phiicchaa jaaa, nam ja taek, ah ah ah, mai wai laew haaaaa, ouyyy, mai hai taek, eh, seaw |
-| **gssspotted** | ai khwye yy, wasup, eyddaemm y, baanph mueng a, passive income, 100 200 300, dobby muslim, how dare you, u!, chibhaayla, ai echiiye yy |
+| **gssspotted** | opening, ending, ignore, ling dislike computer, anchestor awesome, anchestor greatest, dobby-muslim, new knowledge, rock banana, chibhaayla, u r human, kluay aey, no banana, devolution, how dare you |
 
 ## Switch Packs
 
