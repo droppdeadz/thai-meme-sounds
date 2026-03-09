@@ -19,7 +19,7 @@ When the user invokes `/thai-memes`, parse their arguments and execute the appro
 - `/thai-memes pack <name>` — Switch active sound pack
 - `/thai-memes list` — List available sound packs and their sounds
 - `/thai-memes toggle <event>` — Enable/disable a specific event category (session-start, session-end, task-acknowledge, task-complete, error, permission, subagent-start)
-- `/thai-memes test [category]` — Play a test sound from the given category (khom: session-start)
+- `/thai-memes test [category]` — Play a test sound from the given category (e.g. session-start)
 
 ## Implementation
 
