@@ -1,0 +1,28 @@
+{
+  "name": "thai-memes",
+  "version": "1.0.0",
+  "description": "Thai meme sound effects for Claude Code",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "thai-memes",
+    "sound-effects",
+    "developer-experience"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bin": {
+    "thai-memes": "scripts/thai-memes"
+  },
+  "files": [
+    ".claude-plugin/",
+    "hooks/",
+    "scripts/",
+    "skills/",
+    "sounds/",
+    "config.json",
+    "docs/pics/",
+    "README.md",
+    "LICENSE"
+  ]
+}

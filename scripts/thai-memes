@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+# thai-memes — CLI for managing Thai meme sound packs in Claude Code
+# Usage: thai-memes [command] [args]
+
+set -euo pipefail
+
+# Colors
+BOLD='\033[1m'
+DIM='\033[2m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+CYAN='\033[36m'
+RESET='\033[0m'
+
+# Find config file
+find_config() {
+  local script_dir="$(cd "$(dirname "$0")/.." && pwd)"
+  [[ -f "$script_dir/config.json" ]] && echo "$script_dir/config.json" && return 0
+  for f in "$HOME"/.claude/plugins/cache/*/thai-memes/*/config.json; do
+    [[ -f "$f" ]] && echo "$f" && return 0
+  done
+  [[ -f "$HOME/.claude/plugins/thai-memes/config.json" ]] && echo "$HOME/.claude/plugins/thai-memes/config.json" && return 0
+  echo "Error: config.json not found" >&2
+  return 1
+}
+
+find_sounds() {
+  echo "$(dirname "$1")/sounds"
+}
+
+CONFIG=$(find_config)
+SOUNDS_DIR=$(find_sounds "$CONFIG")
+
+read_config() {
+  python3 -c "import json; c=json.load(open('$CONFIG')); print(c.get('$1', '$2'))" 2>/dev/null
+}
+
+write_config() {
+  python3 -c "
+import json
+with open('$CONFIG') as f:
+    c = json.load(f)
+c['$1'] = $2
+with open('$CONFIG', 'w') as f:
+    json.dump(c, f, indent=2)
+    f.write('\n')
+" 2>/dev/null
+}
+
+# Arrow key interactive menu
+interactive_select() {
+  local current="$1"
+  shift
+  local packs=("$@")
+  local selected=0
+  local count=${#packs[@]}
+
+  # Find current pack index
+  for i in "${!packs[@]}"; do
+    [[ "${packs[$i]}" == "$current" ]] && selected=$i
+  done
+
+  # Hide cursor
+  tput civis 2>/dev/null || true
+  trap 'tput cnorm 2>/dev/null; exit' EXIT INT TERM
+
+  while true; do
+    # Clear menu area
+    for ((i=0; i<count+2; i++)); do
+      echo -ne "\033[2K"
+      [[ $i -lt $((count+1)) ]] && echo -ne "\033[1B"
+    done
+    # Move back up
+    for ((i=0; i<count+1; i++)); do
+      echo -ne "\033[1A"
+    done
+
+    # Draw menu
+    echo -e "${BOLD}Select a sound pack:${RESET}  ${DIM}(↑/↓ arrows, Enter to confirm)${RESET}"
+    for i in "${!packs[@]}"; do
+      local pack="${packs[$i]}"
+      local scount=$(find "$SOUNDS_DIR/$pack" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
+      local active=""
+      [[ "$pack" == "$current" ]] && active=" ${GREEN}(active)${RESET}"
+
+      if [[ $i -eq $selected ]]; then
+        echo -e "  ${CYAN}❯${RESET} ${BOLD}🎵 $pack${RESET} ${DIM}($scount sounds)${RESET}$active"
+      else
+        echo -e "    🎵 ${DIM}$pack ($scount sounds)${RESET}$active"
+      fi
+    done
+    echo -ne "\033[2K"
+
+    # Read keypress
+    IFS= read -rsn1 key
+    case "$key" in
+      $'\x1b')
+        read -rsn2 -t 0.1 key2
+        case "$key2" in
+          '[A') # Up arrow
+            ((selected > 0)) && ((selected--))
+            ;;
+          '[B') # Down arrow
+            ((selected < count - 1)) && ((selected++))
+            ;;
+        esac
+        ;;
+      '') # Enter
+        tput cnorm 2>/dev/null || true
+        echo ""
+        echo "${packs[$selected]}"
+        return 0
+        ;;
+      'q'|'Q') # Quit
+        tput cnorm 2>/dev/null || true
+        echo ""
+        return 1
+        ;;
+    esac
+  done
+}
+
+case "${1:-}" in
+  switch|pack|p)
+    if [[ -z "${2:-}" ]]; then
+      current=$(read_config active_pack default)
+      packs=()
+      for dir in "$SOUNDS_DIR"/*/; do
+        packs+=("$(basename "$dir")")
+      done
+
+      echo ""
+      result=$(interactive_select "$current" "${packs[@]}") || exit 0
+      selected=$(echo "$result" | tail -1)
+
+      if [[ -n "$selected" && -d "$SOUNDS_DIR/$selected" ]]; then
+        write_config active_pack "\"$selected\""
+        scount=$(find "$SOUNDS_DIR/$selected" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
+        echo -e "${GREEN}✔${RESET} Switched to ${BOLD}🎵 $selected${RESET} ($scount sounds)"
+
+        # Play preview sound
+        plugin_root="$(dirname "$CONFIG")"
+        CLAUDE_PLUGIN_ROOT="$plugin_root" bash "$plugin_root/scripts/play-sound.sh" session-start 2>/dev/null
+      fi
+    else
+      pack="$2"
+      if [[ -d "$SOUNDS_DIR/$pack" ]]; then
+        write_config active_pack "\"$pack\""
+        scount=$(find "$SOUNDS_DIR/$pack" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
+        echo -e "${GREEN}✔${RESET} Switched to ${BOLD}🎵 $pack${RESET} ($scount sounds)"
+        plugin_root="$(dirname "$CONFIG")"
+        CLAUDE_PLUGIN_ROOT="$plugin_root" bash "$plugin_root/scripts/play-sound.sh" session-start 2>/dev/null
+      else
+        echo -e "${YELLOW}Pack '$pack' not found.${RESET} Available:"
+        ls -1 "$SOUNDS_DIR"
+        exit 1
+      fi
+    fi
+    ;;
+
+  list|ls|l)
+    current=$(read_config active_pack default)
+    echo ""
+    echo -e "${BOLD}🎵 Sound Packs${RESET}"
+    echo ""
+    for dir in "$SOUNDS_DIR"/*/; do
+      pack=$(basename "$dir")
+      scount=$(find "$dir" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
+      if [[ "$pack" == "$current" ]]; then
+        echo -e "  🎵 ${BOLD}$pack${RESET} ${DIM}($scount sounds)${RESET} ${GREEN}← active${RESET}"
+      else
+        echo -e "  🎵 ${DIM}$pack ($scount sounds)${RESET}"
+      fi
+    done
+    echo ""
+    ;;
+
+  volume|vol|v)
+    if [[ -z "${2:-}" ]]; then
+      vol=$(read_config volume 0.5)
+      echo -e "🔊 Volume: ${BOLD}$vol${RESET}"
+    else
+      vol="$2"
+      write_config volume "$vol"
+      echo -e "${GREEN}✔${RESET} Volume set to ${BOLD}$vol${RESET}"
+    fi
+    ;;
+
+  test|t)
+    category="${2:-session-start}"
+    plugin_root="$(dirname "$CONFIG")"
+    pack=$(read_config active_pack default)
+    CLAUDE_PLUGIN_ROOT="$plugin_root" bash "$plugin_root/scripts/play-sound.sh" "$category"
+    echo -e "🔊 Playing ${BOLD}$category${RESET} from 🎵 $pack"
+    ;;
+
+  status|s)
+    pack=$(read_config active_pack default)
+    vol=$(read_config volume 0.5)
+    scount=$(find "$SOUNDS_DIR/$pack" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
+    echo ""
+    echo -e "${BOLD}🎵 Thai Memes${RESET}"
+    echo -e "  Pack:   🎵 ${BOLD}$pack${RESET} ($scount sounds)"
+    echo -e "  Volume: 🔊 ${BOLD}$vol${RESET}"
+    echo ""
+    ;;
+
+  help|--help|-h)
+    echo ""
+    echo -e "${BOLD}🎵 thai-memes${RESET} — manage Claude Code Thai meme sound packs"
+    echo ""
+    echo -e "  ${CYAN}switch${RESET} [pack]     Interactive pack picker (or direct switch)"
+    echo -e "  ${CYAN}list${RESET}              List all available packs"
+    echo -e "  ${CYAN}volume${RESET} [0.0-1.0]  Get or set volume"
+    echo -e "  ${CYAN}test${RESET} [category]   Play a test sound"
+    echo -e "  ${CYAN}status${RESET}            Show current config"
+    echo ""
+    echo -e "  ${DIM}thai-memes switch             # arrow-key picker${RESET}"
+    echo -e "  ${DIM}thai-memes switch my-pack      # direct switch${RESET}"
+    echo -e "  ${DIM}thai-memes volume 0.3          # quieter${RESET}"
+    echo -e "  ${DIM}thai-memes test task-complete   # preview a sound${RESET}"
+    echo ""
+    ;;
+
+  *)
+    # No args = show status + hint
+    pack=$(read_config active_pack default)
+    vol=$(read_config volume 0.5)
+    scount=$(find "$SOUNDS_DIR/$pack" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
+    echo ""
+    echo -e "${BOLD}🎵 Thai Memes${RESET} — ${BOLD}$pack${RESET} ($scount sounds) 🔊 $vol"
+    echo -e "  ${DIM}Run${RESET} ${CYAN}thai-memes switch${RESET} ${DIM}to change pack${RESET}"
+    echo ""
+    ;;
+esac
