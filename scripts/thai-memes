@@ -123,7 +123,7 @@ interactive_select() {
 case "${1:-}" in
   switch|pack|p)
     if [[ -z "${2:-}" ]]; then
-      current=$(read_config active_pack default)
+      current=$(read_config active_pack khom)
       packs=()
       for dir in "$SOUNDS_DIR"/*/; do
         packs+=("$(basename "$dir")")
@@ -159,7 +159,7 @@ case "${1:-}" in
     ;;
 
   list|ls|l)
-    current=$(read_config active_pack default)
+    current=$(read_config active_pack khom)
     echo ""
     echo -e "${BOLD}🎵 Sound Packs${RESET}"
     echo ""
@@ -188,14 +188,15 @@ case "${1:-}" in
 
   test|t)
     category="${2:-session-start}"
+    # Valid categories: session-start, session-end, task-acknowledge, task-complete, error, permission, subagent-start
     plugin_root="$(dirname "$CONFIG")"
-    pack=$(read_config active_pack default)
+    pack=$(read_config active_pack khom)
     CLAUDE_PLUGIN_ROOT="$plugin_root" bash "$plugin_root/scripts/play-sound.sh" "$category"
     echo -e "🔊 Playing ${BOLD}$category${RESET} from 🎵 $pack"
     ;;
 
   status|s)
-    pack=$(read_config active_pack default)
+    pack=$(read_config active_pack khom)
     vol=$(read_config volume 0.5)
     scount=$(find "$SOUNDS_DIR/$pack" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
     echo ""
@@ -215,6 +216,8 @@ case "${1:-}" in
     echo -e "  ${CYAN}test${RESET} [category]   Play a test sound"
     echo -e "  ${CYAN}status${RESET}            Show current config"
     echo ""
+    echo -e "  ${DIM}Categories: session-start, session-end, task-acknowledge, task-complete, error, permission, subagent-start${RESET}"
+    echo ""
     echo -e "  ${DIM}thai-memes switch             # arrow-key picker${RESET}"
     echo -e "  ${DIM}thai-memes switch my-pack      # direct switch${RESET}"
     echo -e "  ${DIM}thai-memes volume 0.3          # quieter${RESET}"
@@ -224,7 +227,7 @@ case "${1:-}" in
 
   *)
     # No args = show status + hint
-    pack=$(read_config active_pack default)
+    pack=$(read_config active_pack khom)
     vol=$(read_config volume 0.5)
     scount=$(find "$SOUNDS_DIR/$pack" \( -name "*.mp3" -o -name "*.wav" -o -name "*.ogg" \) 2>/dev/null | wc -l | tr -d ' ')
     echo ""

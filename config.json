@@ -1,11 +1,13 @@
 {
   "volume": 0.5,
-  "active_pack": "default",
+  "active_pack": "khom",
   "enabled_events": {
     "session-start": true,
+    "session-end": true,
     "task-acknowledge": true,
     "task-complete": true,
     "error": true,
-    "permission": true
+    "permission": true,
+    "subagent-start": true
   }
 }

@@ -18,8 +18,8 @@ When the user invokes `/thai-memes`, parse their arguments and execute the appro
 - `/thai-memes volume <0.0-1.0>` — Set volume level
 - `/thai-memes pack <name>` — Switch active sound pack
 - `/thai-memes list` — List available sound packs and their sounds
-- `/thai-memes toggle <event>` — Enable/disable a specific event category
-- `/thai-memes test [category]` — Play a test sound from the given category (default: session-start)
+- `/thai-memes toggle <event>` — Enable/disable a specific event category (session-start, session-end, task-acknowledge, task-complete, error, permission, subagent-start)
+- `/thai-memes test [category]` — Play a test sound from the given category (khom: session-start)
 
 ## Implementation
 
@@ -35,6 +35,6 @@ Use the Bash tool to read/write config.json and the Read tool to display current
 
 ### Example responses
 
-**Status**: "🎵 Thai Memes: default pack, volume 0.5, all events enabled"
+**Status**: "🎵 Thai Memes: khom pack, volume 0.5, all events enabled"
 **Volume change**: "🔊 Volume set to 0.3"
 **Pack switch**: "🎵 Switched to my-pack"
