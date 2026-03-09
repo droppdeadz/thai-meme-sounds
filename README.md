@@ -31,8 +31,8 @@ Then restart Claude Code.
 | Pack | Sounds |
 |------|--------|
 | **khom** (default) | ez kids, more harder, lets go, smell bad, stab, i sus, please don't, ubah, slap, this is my ways, u know me?, thuy, want more |
-| **master daeng** | say hello, for what, u cool?, u good?, khaeng, hom, tell u, lick, shark wow |
-| **phiicchaa** | phiicchaa jaaa, nam ja taek, ah ah ah, mai wai laew haaaaa, ouyyy, mai hai taek, eh, seaw |
+| **master daeng (NSFW)** | say hello, for what, u cool?, u good?, khaeng, hom, tell u, lick, shark wow |
+| **phiicchaa (NSFW)** | phiicchaa jaaa, nam ja taek, ah ah ah, mai wai laew haaaaa, ouyyy, mai hai taek, eh, seaw |
 
 ## Switch Packs
 
